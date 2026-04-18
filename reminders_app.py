@@ -431,6 +431,25 @@ end run
     return row
 
 
+def show_reminder(reminder_id: str) -> None:
+    reminder_id = normalize_reminder_id(reminder_id)
+    script = """
+on run argv
+    set targetId to item 1 of argv
+    tell application "Reminders"
+        try
+            set reminderRef to reminder id targetId
+            show reminderRef
+            activate
+        on error
+            error "No reminder found with id " & targetId
+        end try
+    end tell
+end run
+"""
+    run_osascript(script, [reminder_id])
+
+
 def create_list(name: str) -> None:
     script = """
 on run argv
@@ -682,6 +701,15 @@ def make_parser() -> argparse.ArgumentParser:
     reminders_view_parser.add_argument("--json", action="store_true", help="JSON output")
     reminders_view_parser.set_defaults(func=cmd_reminders_view)
 
+    reminders_show_parser = reminders_subparsers.add_parser(
+        "show",
+        aliases=["open"],
+        help="Show a reminder in the Reminders app",
+        description="Reveal one reminder by id in the macOS Reminders application.",
+    )
+    reminders_show_parser.add_argument("--id", required=True, help="Reminder id")
+    reminders_show_parser.set_defaults(func=cmd_reminders_show)
+
     reminders_create_parser = reminders_subparsers.add_parser(
         "create",
         aliases=["add"],
@@ -850,6 +878,11 @@ def cmd_reminders_view(args: argparse.Namespace) -> None:
     print(f"tags: {row['tags']}")
     print("")
     print(row["notes"])
+
+
+def cmd_reminders_show(args: argparse.Namespace) -> None:
+    show_reminder(args.id)
+    print("Reminder shown in Reminders app.")
 
 
 def cmd_reminders_create(args: argparse.Namespace) -> None:

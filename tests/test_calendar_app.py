@@ -75,6 +75,14 @@ class CalendarAppTests(unittest.TestCase):
         self.assertEqual("1h", create_mock.call_args.kwargs["duration_str"])
         self.assertEqual("", create_mock.call_args.kwargs["end_date"])
 
+    def test_show_event(self) -> None:
+        with patch("calendar_app.run_osascript") as script_mock:
+            exit_code = calendar_app.main(["events", "show", "--id", "123"])
+        self.assertEqual(0, exit_code)
+        script_mock.assert_called_once()
+        self.assertIn("show anEvent", script_mock.call_args[0][0])
+        self.assertIn("activate", script_mock.call_args[0][0])
+
     def test_subprocess_failure_returns_nonzero(self) -> None:
         with patch("calendar_app.run_osascript", side_effect=subprocess.SubprocessError("spawn failed")):
             code = calendar_app.main(["events", "list"])

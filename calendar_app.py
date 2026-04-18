@@ -300,6 +300,26 @@ end run
     return rows[0]
 
 
+def show_event(event_id: str) -> None:
+    script = """
+on run argv
+    set targetId to item 1 of argv
+    tell application "Calendar"
+        repeat with aCal in every calendar
+            try
+                set anEvent to event id targetId of aCal
+                show anEvent
+                activate
+                return
+            end try
+        end repeat
+        error "No event found with id " & targetId
+    end tell
+end run
+"""
+    run_osascript(script, [event_id])
+
+
 def create_calendar(name: str) -> None:
     script = """
 on run argv
@@ -567,6 +587,11 @@ def cmd_events_view(args: argparse.Namespace) -> None:
     print(row["description"])
 
 
+def cmd_events_show(args: argparse.Namespace) -> None:
+    show_event(args.id)
+    print("Event shown in Calendar app.")
+
+
 def cmd_events_create(args: argparse.Namespace) -> None:
     create_event(
         summary=args.summary,
@@ -659,6 +684,15 @@ def make_parser() -> argparse.ArgumentParser:
     ev_view.add_argument("--id", required=True, help="Event ID")
     ev_view.add_argument("--json", action="store_true", help="JSON output")
     ev_view.set_defaults(func=cmd_events_view)
+
+    ev_show = events_subparsers.add_parser(
+        "show",
+        aliases=["open"],
+        help="Show an event in the Calendar app",
+        description="Reveal one event by id in the macOS Calendar application.",
+    )
+    ev_show.add_argument("--id", required=True, help="Event ID")
+    ev_show.set_defaults(func=cmd_events_show)
 
     ev_create = events_subparsers.add_parser("create", aliases=["add"], help="Create an event")
     ev_create.add_argument("--summary", required=True, help="Summary")

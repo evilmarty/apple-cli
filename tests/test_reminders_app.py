@@ -116,6 +116,14 @@ class RemindersAppTests(unittest.TestCase):
             parser.parse_args(["--version"])
         self.assertEqual(f"reminders-app {version.__version__}", buffer.getvalue().strip())
 
+    def test_show_reminder(self) -> None:
+        with patch("reminders_app.run_osascript") as script_mock:
+            exit_code = reminders_app.main(["reminders", "show", "--id", "123"])
+        self.assertEqual(0, exit_code)
+        script_mock.assert_called_once()
+        self.assertIn("show reminderRef", script_mock.call_args[0][0])
+        self.assertIn("activate", script_mock.call_args[0][0])
+
     def test_subprocess_failure_returns_nonzero(self) -> None:
         with patch("reminders_app.run_osascript", side_effect=subprocess.SubprocessError("spawn failed")):
             code = reminders_app.main(["reminders", "list"])

@@ -32,6 +32,7 @@ mail-app --help
 ```bash
 mail-app messages list [--account ACCOUNT] [--mailbox MAILBOX] [--limit N] [--order desc|asc] [--json]
 mail-app messages view (--id "<id>" | --message-id "<message-id>") [--account ACCOUNT] [--mailbox MAILBOX] [--body-only] [--json]
+mail-app messages show (--id "<id>" | --message-id "<message-id>") [--account ACCOUNT] [--mailbox MAILBOX]
 mail-app messages send --to "a@example.com,b@example.com" --subject "Hello" --body "Hi there" [--cc ...] [--bcc ...] [--account ACCOUNT]
 mail-app messages move (--id "<id>" | --message-id "<message-id>") --destination-mailbox DEST [--account ACCOUNT] [--source-mailbox MAILBOX]
 mail-app messages archive (--id "<id>" | --message-id "<message-id>") [--account ACCOUNT] [--mailbox MAILBOX]
@@ -55,6 +56,7 @@ mail-app mailboxes delete --account ACCOUNT --mailbox MAILBOX
 ```bash
 reminders-app reminders list [--list LIST] [--limit N] [--order desc|asc] [--completed|--all] [--json]
 reminders-app reminders view --id ID [--body-only] [--json]
+reminders-app reminders show --id ID
 reminders-app reminders create --title TITLE [--notes TEXT] [--list LIST] [--due-date DATE] [--priority N]
 reminders-app reminders update --id ID [--title TITLE] [--notes TEXT] [--due-date DATE] [--priority N] [--list LIST]
 reminders-app reminders complete [--id ID | selectors | --all]
@@ -83,6 +85,7 @@ Due to inefficiencies in how the Apple Reminders application handles bulk querie
 ```bash
 calendar-app events list [--calendar CALENDAR] [--start-after DATE] [--start-before DATE] [--limit N] [--order desc|asc] [--json]
 calendar-app events view --id ID [--json]
+calendar-app events show --id ID
 calendar-app events create --summary SUMMARY --start-date DATE (--end-date DATE | --duration DURATION) [--location LOC] [--notes TEXT] [--all-day] [--url URL] [--calendar CAL] [--alarm MIN]
 calendar-app events update --id ID [--summary SUMMARY] [--start-date DATE] [--end-date DATE | --duration DURATION] [--location LOC] [--notes TEXT] [--all-day|--no-all-day] [--url URL] [--calendar CAL]
 calendar-app events delete --id ID

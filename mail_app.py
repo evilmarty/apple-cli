@@ -320,6 +320,67 @@ end run
     return message
 
 
+def show_message(account: str, mailbox: str, target_id: str, target_message_id: str) -> None:
+    script = (
+        script_helpers()
+        + """
+on run argv
+    set accountName to item 1 of argv
+    set mailboxName to item 2 of argv
+    set targetId to item 3 of argv
+    set targetMessageId to item 4 of argv
+
+    tell application "Mail"
+        activate
+        if accountName is "" then
+            set targetAccounts to every account
+        else
+            set targetAccounts to {account accountName}
+        end if
+
+        repeat with accountRef in targetAccounts
+            if mailboxName is "" then
+                set targetMailboxes to every mailbox of accountRef
+            else
+                set targetMailboxes to {my mailboxByPath(accountRef, mailboxName)}
+            end if
+
+            repeat with mailboxRef in targetMailboxes
+                if targetId is not "" then
+                    try
+                        set matches to (messages of mailboxRef whose id is (targetId as integer))
+                    on error
+                        set matches to {}
+                    end try
+                else
+                    set matches to (messages of mailboxRef whose message id is targetMessageId)
+                end if
+
+                if (count of matches) > 0 then
+                    set theMessage to item 1 of matches
+                    
+                    if (count of message viewers) is 0 then
+                        make new message viewer
+                    end if
+                    
+                    set selected messages of message viewer 1 to {theMessage}
+                    return
+                end if
+            end repeat
+        end repeat
+        
+        if targetId is not "" then
+            error "No message found with id " & targetId
+        else
+            error "No message found with message-id " & targetMessageId
+        end if
+    end tell
+end run
+"""
+    )
+    run_osascript(script, [account, mailbox, target_id, target_message_id])
+
+
 def send_message(
     to_addresses: str,
     cc_addresses: str,
@@ -607,6 +668,17 @@ def make_parser() -> argparse.ArgumentParser:
     messages_view_parser.add_argument("--json", action="store_true", help="JSON output")
     messages_view_parser.set_defaults(func=cmd_messages_view, parser_obj=messages_view_parser)
 
+    messages_show_parser = messages_subparsers.add_parser(
+        "show",
+        aliases=["open"],
+        help="Show a message in the Mail app",
+        description="Reveal one message by id or message-id in the macOS Mail application.",
+    )
+    add_message_selector_arguments(messages_show_parser)
+    messages_show_parser.add_argument("--account", default="", help="Mail account name")
+    messages_show_parser.add_argument("--mailbox", default="", help="Mailbox path (requires --account)")
+    messages_show_parser.set_defaults(func=cmd_messages_show, parser_obj=messages_show_parser)
+
     messages_send_parser = messages_subparsers.add_parser(
         "send",
         aliases=["s"],
@@ -723,6 +795,12 @@ def cmd_messages_view(args: argparse.Namespace) -> None:
     print(f"mailbox: {row['mailbox']}")
     print("")
     print(row["content"])
+
+
+def cmd_messages_show(args: argparse.Namespace) -> None:
+    require_account_if_mailbox(args.account, args.mailbox, args.parser_obj)
+    show_message(args.account, args.mailbox, args.id or "", args.message_id or "")
+    print("Message shown in Mail app.")
 
 
 def cmd_messages_send(args: argparse.Namespace) -> None:

@@ -87,6 +87,14 @@ class AppleMailTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             mail_app.main(["messages", "view", "--id", "1", "--message-id", "mid-1"])
 
+    def test_show_message(self) -> None:
+        with patch("mail_app.run_osascript") as script_mock:
+            exit_code = mail_app.main(["messages", "show", "--id", "123"])
+        self.assertEqual(0, exit_code)
+        script_mock.assert_called_once()
+        self.assertIn("set selected messages of message viewer 1 to {theMessage}", script_mock.call_args[0][0])
+        self.assertIn("activate", script_mock.call_args[0][0])
+
     def test_messages_aliases_work(self) -> None:
         with patch("mail_app.run_osascript", return_value="") as script_mock:
             exit_code = mail_app.main(["msg", "ls"])
