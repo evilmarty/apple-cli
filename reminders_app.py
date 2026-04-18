@@ -52,7 +52,12 @@ def parse_tsv(output: str, field_names: Sequence[str]) -> list[dict[str, str]]:
     return rows
 
 
-def print_rows(rows: Sequence[dict[str, Any]], as_json: bool, columns: list[str] | None = None) -> None:
+def print_rows(
+    rows: Sequence[dict[str, Any]],
+    as_json: bool,
+    columns: list[str] | None = None,
+    print_headers: bool = True,
+) -> None:
     if as_json:
         if columns:
             rows = [{k: v for k, v in row.items() if k in columns} for row in rows]
@@ -62,7 +67,8 @@ def print_rows(rows: Sequence[dict[str, Any]], as_json: bool, columns: list[str]
         return
     
     headers = columns if columns else list(rows[0].keys())
-    print("\t".join(headers))
+    if print_headers:
+        print("\t".join(headers))
     for row in rows:
         # Use .get with key mapping if necessary, or assume rows contain exact keys
         print("\t".join(str(row.get(header, "")) for header in headers))
@@ -887,7 +893,7 @@ def cmd_reminders_move(args: argparse.Namespace) -> None:
 
 
 def cmd_lists_list(args: argparse.Namespace) -> None:
-    print_rows(list_lists(), args.json)
+    print_rows(list_lists(), args.json, print_headers=False)
 
 
 def cmd_lists_create(args: argparse.Namespace) -> None:

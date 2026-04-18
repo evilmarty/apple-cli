@@ -44,14 +44,19 @@ def parse_tsv(output: str, field_names: Sequence[str]) -> list[dict[str, str]]:
     return rows
 
 
-def print_rows(rows: Sequence[dict[str, Any]], as_json: bool) -> None:
+def print_rows(
+    rows: Sequence[dict[str, Any]],
+    as_json: bool,
+    print_headers: bool = True,
+) -> None:
     if as_json:
         print(json.dumps(list(rows), ensure_ascii=False, indent=2))
         return
     if not rows:
         return
     headers = [key for key in rows[0].keys() if key != "message_id"]
-    print("\t".join(headers))
+    if print_headers:
+        print("\t".join(headers))
     for row in rows:
         print("\t".join(str(row.get(header, "")) for header in headers))
 
@@ -740,7 +745,7 @@ def cmd_messages_action(args: argparse.Namespace) -> None:
 
 def cmd_mailboxes_list(args: argparse.Namespace) -> None:
     rows = list_mailboxes(args.account)
-    print_rows(rows, args.json)
+    print_rows(rows, args.json, print_headers=False)
 
 
 def cmd_mailboxes_create(args: argparse.Namespace) -> None:

@@ -6,6 +6,8 @@ A collection of Python CLIs for controlling Apple applications through AppleScri
 
 `reminders-app` is a companion Python CLI for Apple Reminders with list/reminder management and query-based bulk actions.
 
+`calendar-app` is a Python CLI for Apple Calendar to manage calendars and events.
+
 ## Requirements
 
 - macOS
@@ -73,3 +75,28 @@ reminders-app lists delete --list NAME
 ### Note on Performance
 
 Due to inefficiencies in how the Apple Reminders application handles bulk queries and property retrieval through AppleScript, some commands (especially `list` when querying many items) may experience delays or timeouts. If you encounter timeouts, try narrowing the scope of your command by specifying a `--list`.
+
+## calendar-app command overview
+
+### Events
+
+```bash
+calendar-app events list [--calendar CALENDAR] [--start-after DATE] [--start-before DATE] [--limit N] [--order desc|asc] [--json]
+calendar-app events view --id ID [--json]
+calendar-app events create --summary SUMMARY --start-date DATE (--end-date DATE | --duration DURATION) [--location LOC] [--notes TEXT] [--all-day] [--url URL] [--calendar CAL] [--alarm MIN]
+calendar-app events update --id ID [--summary SUMMARY] [--start-date DATE] [--end-date DATE | --duration DURATION] [--location LOC] [--notes TEXT] [--all-day|--no-all-day] [--url URL] [--calendar CAL]
+calendar-app events delete --id ID
+```
+
+- `events list` defaults to events starting from "now" if no date range is provided.
+- `events list` output includes a human-friendly `duration` column (e.g., `15m`, `2h`, `1d`).
+- `events create/update` `--duration` accepts human-friendly strings like `30m`, `3h`, `2d`.
+
+### Calendars
+
+```bash
+calendar-app calendars list [--json]
+calendar-app calendars create --name NAME
+calendar-app calendars rename --calendar NAME --new-name NEW_NAME
+calendar-app calendars delete --calendar NAME
+```
