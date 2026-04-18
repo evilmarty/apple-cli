@@ -1,12 +1,15 @@
-# mail-app
+# Apple CLIs
 
-`mail-app` is a Python CLI that controls Apple Mail through AppleScript (`osascript`).
+A collection of Python CLIs for controlling Apple applications through AppleScript (`osascript`). No dependency on third-party Python packages, just the standard library. Each CLI is self-contained and can be installed separately, but they share a common design and codebase for AppleScript interaction.
+
+`mail-app` is a Python CLI that controls Apple Mail that can view and send messages.
+
+`reminders-app` is a companion Python CLI for Apple Reminders with list/reminder management and query-based bulk actions.
 
 ## Requirements
 
-- macOS with Apple Mail configured
-- Python 3.13+
-- Mail automation permission granted to your terminal when prompted
+- macOS
+- Python 3.9+
 
 ## Install (editable/development)
 
@@ -20,14 +23,7 @@ Then run:
 mail-app --help
 ```
 
-## Command overview
-
-Aliases:
-- `messages`: `msgs`, `msg`
-- `mailboxes`: `mbox`, `mboxs`, `mboxes`
-- `list`: `ls`
-- `view`: `v`
-- mailbox `delete`: `remove`, `rm`
+## mail-app command overview
 
 ### Messages
 

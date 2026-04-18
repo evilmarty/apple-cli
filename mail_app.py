@@ -6,6 +6,8 @@ import subprocess
 import sys
 from typing import Any, Sequence
 
+from version import __version__
+
 
 DEFAULT_LIST_LIMIT = 100
 
@@ -563,6 +565,7 @@ def make_parser() -> argparse.ArgumentParser:
         prog="mail-app",
         description="Apple Mail command-line interface powered by AppleScript.",
     )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     root_subparsers = parser.add_subparsers(dest="resource", required=True)
 
     messages_parser = root_subparsers.add_parser(

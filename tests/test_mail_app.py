@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import mail_app
+import version
 
 
 class AppleMailTests(unittest.TestCase):
@@ -133,6 +134,13 @@ class AppleMailTests(unittest.TestCase):
         with redirect_stdout(buffer), self.assertRaises(SystemExit):
             parser.parse_args(["messages", "view", "-h"])
         self.assertIn("Show message metadata and content, or output body only.", buffer.getvalue())
+
+    def test_version_flag_prints_version(self) -> None:
+        parser = mail_app.make_parser()
+        buffer = io.StringIO()
+        with redirect_stdout(buffer), self.assertRaises(SystemExit):
+            parser.parse_args(["--version"])
+        self.assertEqual(f"mail-app {version.__version__}", buffer.getvalue().strip())
 
     def test_subprocess_failure_returns_nonzero(self) -> None:
         with patch(
