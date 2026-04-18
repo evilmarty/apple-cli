@@ -46,13 +46,30 @@ mail-app mailboxes rename --account ACCOUNT --mailbox MAILBOX --new-name NEW_NAM
 mail-app mailboxes delete --account ACCOUNT --mailbox MAILBOX
 ```
 
-## Behavior notes
+## reminders-app command overview
 
-- `messages list` defaults to each account's Inbox, newest-first (`--order desc`), and returns the newest 100 messages unless overridden.
-- `--mailbox` options require `--account` for deterministic mailbox resolution.
-- Message-targeting commands accept either `--id` or `--message-id` (mutually exclusive).
-- `messages view` uses `date` as the date field name.
-- `messages view --body-only` prints only the message body.
-- Plain text output hides the RFC `message_id` field; JSON output (`--json`) includes it.
-- Mailboxes are represented as slash-delimited paths (example: `Projects/2026`).
-- `archive` and `spam` move to `Archive` and `Junk` mailbox paths for the selected account.
+### Reminders
+
+```bash
+reminders-app reminders list [--list LIST] [--limit N] [--order desc|asc] [--completed|--all] [--json]
+reminders-app reminders view --id ID [--body-only] [--json]
+reminders-app reminders create --title TITLE [--notes TEXT] [--list LIST] [--due-date DATE] [--priority N]
+reminders-app reminders update --id ID [--title TITLE] [--notes TEXT] [--due-date DATE] [--priority N] [--list LIST]
+reminders-app reminders complete [--id ID | selectors | --all]
+reminders-app reminders uncomplete [--id ID | selectors | --all]
+reminders-app reminders delete [--id ID | selectors | --all]
+reminders-app reminders move --destination-list LIST [--id ID | selectors | --all]
+```
+
+### Lists
+
+```bash
+reminders-app lists list [--json]
+reminders-app lists create --name NAME
+reminders-app lists rename --list NAME --new-name NEW_NAME
+reminders-app lists delete --list NAME
+```
+
+### Note on Performance
+
+Due to inefficiencies in how the Apple Reminders application handles bulk queries and property retrieval through AppleScript, some commands (especially `list` when querying many items) may experience delays or timeouts. If you encounter timeouts, try narrowing the scope of your command by specifying a `--list`.
