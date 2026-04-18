@@ -1,0 +1,10 @@
+[project]
+name = "apple-cli"
+version = "0.1.0"
+description = "CLI tooling for Apple Mail via AppleScript"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+mail-app = "mail_app:main"
