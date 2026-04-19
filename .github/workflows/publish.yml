@@ -1,0 +1,23 @@
+name: Publish
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: robinraju/release-downloader@v1.12
+        with:
+          releaseId: ${{ github.event.release.id }}
+          tarBall: false
+          zipBall: false
+          fileName: "*"
+          out-file-path: dist/
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}

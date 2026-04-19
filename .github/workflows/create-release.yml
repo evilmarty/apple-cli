@@ -1,0 +1,42 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/apple_cli/version.py
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - id: version
+        run: |
+          version=$(sed -n -E '/VERSION/s/[^=]+=\s*//p'  src/apple_cli/version.py | sed -E 's/(^[^"]*"|"[^"]*$)//g')
+          tag="v${version}"
+          echo "new_version=${version}" >> "$GITHUB_OUTPUT"
+          echo "new_tag=${tag}" >> "$GITHUB_OUTPUT"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[build]
+      - name: Build package
+        run: python -m build
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "${{steps.version.outputs.new_tag}}"
+          target_commitish: ${{github.sha}}
+          generate_release_notes: true
+          draft: true
+          files: |
+            dist/**
