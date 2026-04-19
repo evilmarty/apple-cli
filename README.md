@@ -10,6 +10,8 @@ A collection of Python CLIs for controlling Apple applications through AppleScri
 
 `notes-app` is a Python CLI for Apple Notes to manage notes and folders.
 
+`contacts-app` is a Python CLI for macOS Contacts to manage contacts and groups.
+
 ## Requirements
 
 - macOS
@@ -125,4 +127,24 @@ notes-app notes delete --id ID
 notes-app folders list [--json]
 notes-app folders create --name NAME
 notes-app folders delete --name NAME
+```
+
+## contacts-app command overview
+
+### Contacts
+
+```bash
+contacts-app contacts list [--search TEXT] [--group GROUP] [--limit N] [--order desc|asc] [--json]
+contacts-app contacts view --id ID [--json]
+contacts-app contacts show --id ID
+contacts-app contacts create --first-name NAME [--last-name NAME] [--organization ORG] [--job-title JOB] [--nickname NICK] [--note TEXT] [--email EMAIL] [--phone PHONE]
+contacts-app contacts delete --id ID
+```
+
+### Groups
+
+```bash
+contacts-app groups list [--json]
+contacts-app groups create --name NAME
+contacts-app groups delete --name NAME
 ```

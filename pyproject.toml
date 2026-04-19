@@ -15,9 +15,10 @@ mail-app = "mail_app:main"
 reminders-app = "reminders_app:main"
 calendar-app = "calendar_app:main"
 notes-app = "notes_app:main"
+contacts-app = "contacts_app:main"
 
 [tool.setuptools]
-py-modules = ["mail_app", "reminders_app", "calendar_app", "notes_app", "version"]
+py-modules = ["mail_app", "reminders_app", "calendar_app", "notes_app", "contacts_app", "version"]
 
 [tool.setuptools.dynamic]
 version = {attr = "version.__version__"}
