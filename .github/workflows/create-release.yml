@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v6
       - id: version
         run: |
-          version=$(sed -n -E '/VERSION/s/[^=]+=\s*//p'  src/apple_cli/version.py | sed -E 's/(^[^"]*"|"[^"]*$)//g')
+          version=$(sed -n -E '/__version__/s/[^=]+=\s*//p'  src/apple_cli/version.py | sed -E 's/(^[^"]*"|"[^"]*$)//g')
           tag="v${version}"
           echo "new_version=${version}" >> "$GITHUB_OUTPUT"
           echo "new_tag=${tag}" >> "$GITHUB_OUTPUT"
