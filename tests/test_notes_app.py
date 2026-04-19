@@ -52,6 +52,7 @@ class NotesAppTests(unittest.TestCase):
         output = buffer.getvalue()
         self.assertIn("id: 1", output)
         self.assertIn("name: Name", output)
+        self.assertIn("creation date: 2026-01-01", output)
         self.assertIn("Plaintext", output)
         self.assertNotIn("Body", output)
 

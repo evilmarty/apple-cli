@@ -14,6 +14,19 @@ except ImportError:
 
 DEFAULT_LIST_LIMIT = 100
 OSASCRIPT_TIMEOUT_SECONDS = 120
+MISSING_VALUE = "missing value"
+
+CALENDAR_DISPLAY_LABELS = {
+    "id": "id",
+    "summary": "summary",
+    "start_date": "start date",
+    "end_date": "end date",
+    "location": "location",
+    "allday": "all-day",
+    "url": "url",
+    "calendar": "calendar",
+    "alarms": "alarms"
+}
 
 
 class CalendarAppError(RuntimeError):
@@ -575,7 +588,20 @@ def cmd_events_list(args: argparse.Namespace) -> None:
         limit=args.limit,
         order=args.order,
     )
-    print_rows(rows, args.json)
+    
+    formatted_rows = []
+    for row in rows:
+        formatted_row = {
+            "id": row.get("id", ""),
+            "summary": row.get("summary", ""),
+            "start date": row.get("start_date", ""),
+            "duration": row.get("duration", ""),
+            "location": row.get("location", ""),
+            "calendar": row.get("calendar", ""),
+        }
+        formatted_rows.append(formatted_row)
+
+    print_rows(formatted_rows, args.json, columns=["id", "summary", "start date", "duration", "location", "calendar"])
 
 
 def cmd_events_view(args: argparse.Namespace) -> None:
@@ -584,10 +610,11 @@ def cmd_events_view(args: argparse.Namespace) -> None:
         print(json.dumps(row, ensure_ascii=False, indent=2))
         return
 
-    for k in ["id", "summary", "start_date", "end_date", "location", "allday", "url", "calendar", "alarms"]:
+    for k in CALENDAR_DISPLAY_LABELS.keys():
         v = row.get(k, "")
-        if v and v != "missing value":
-            print(f"{k}: {v}")
+        if v and v != MISSING_VALUE:
+            label = CALENDAR_DISPLAY_LABELS.get(k, k)
+            print(f"{label}: {v}")
 
     if row.get("description"):
         print("")

@@ -13,6 +13,18 @@ except ImportError:
 
 
 DEFAULT_LIST_LIMIT = 100
+MISSING_VALUE = "missing value"
+
+MESSAGE_DISPLAY_LABELS = {
+    "id": "id",
+    "subject": "subject",
+    "sender": "sender",
+    "date": "date",
+    "account": "account",
+    "mailbox": "mailbox"
+}
+
+ACTION_ALIASES = {"archive": ["arch"], "trash": ["delete", "rm"], "spam": ["junk"]}
 
 
 class AppleMailError(RuntimeError):
@@ -50,14 +62,18 @@ def parse_tsv(output: str, field_names: Sequence[str]) -> list[dict[str, str]]:
 def print_rows(
     rows: Sequence[dict[str, Any]],
     as_json: bool,
+    columns: list[str] | None = None,
     print_headers: bool = True,
 ) -> None:
     if as_json:
+        if columns:
+            rows = [{k: v for k, v in row.items() if k in columns} for row in rows]
         print(json.dumps(list(rows), ensure_ascii=False, indent=2))
         return
     if not rows:
         return
-    headers = [key for key in rows[0].keys() if key != "message_id"]
+    
+    headers = columns if columns else [key for key in rows[0].keys() if key != "message_id"]
     if print_headers:
         print("\t".join(headers))
     for row in rows:
@@ -708,11 +724,10 @@ def make_parser() -> argparse.ArgumentParser:
     messages_move_parser.add_argument("--source-mailbox", default="", help="Source mailbox path (requires --account)")
     messages_move_parser.set_defaults(func=cmd_messages_move, parser_obj=messages_move_parser)
 
-    action_aliases = {"archive": ["arch"], "trash": ["delete", "rm"], "spam": ["junk"]}
     for action_name in ("archive", "trash", "spam"):
         action_parser = messages_subparsers.add_parser(
             action_name,
-            aliases=action_aliases[action_name],
+            aliases=ACTION_ALIASES[action_name],
             help=f"{action_name.title()} a message",
             description=f"{action_name.title()} a message selected by id or message-id.",
         )
@@ -778,7 +793,20 @@ def cmd_messages_list(args: argparse.Namespace) -> None:
     if args.limit <= 0:
         args.parser_obj.error("--limit must be greater than 0")
     rows = list_messages(args.account, args.mailbox, args.limit, args.order)
-    print_rows(rows, args.json)
+    
+    formatted_rows = []
+    for row in rows:
+        formatted_row = {
+            "id": row.get("id", ""),
+            "subject": row.get("subject", ""),
+            "sender": row.get("sender", ""),
+            "date": row.get("date_received", ""),
+            "account": row.get("account", ""),
+            "mailbox": row.get("mailbox", ""),
+        }
+        formatted_rows.append(formatted_row)
+    
+    print_rows(formatted_rows, args.json, columns=["id", "subject", "sender", "date", "account", "mailbox"])
 
 
 def cmd_messages_view(args: argparse.Namespace) -> None:
@@ -791,10 +819,11 @@ def cmd_messages_view(args: argparse.Namespace) -> None:
         print(json.dumps(row, ensure_ascii=False, indent=2))
         return
     
-    for k in ["id", "subject", "sender", "date", "account", "mailbox"]:
+    for k in MESSAGE_DISPLAY_LABELS.keys():
         v = row.get(k, "")
-        if v and v != "missing value":
-            print(f"{k}: {v}")
+        if v and v != MISSING_VALUE:
+            label = MESSAGE_DISPLAY_LABELS.get(k, k)
+            print(f"{label}: {v}")
     
     if row.get("content"):
         print("")

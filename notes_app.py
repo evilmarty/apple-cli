@@ -14,6 +14,15 @@ except ImportError:
 
 DEFAULT_LIST_LIMIT = 100
 OSASCRIPT_TIMEOUT_SECONDS = 120
+MISSING_VALUE = "missing value"
+
+NOTES_DISPLAY_LABELS = {
+    "id": "id",
+    "name": "name",
+    "creation_date": "creation date",
+    "modification_date": "modification date",
+    "folder": "folder"
+}
 
 
 class NotesAppError(RuntimeError):
@@ -371,7 +380,18 @@ def cmd_folders_delete(args: argparse.Namespace) -> None:
 
 def cmd_notes_list(args: argparse.Namespace) -> None:
     rows = list_notes(args.folder, args.limit, args.order)
-    print_rows(rows, args.json)
+    
+    formatted_rows = []
+    for row in rows:
+        formatted_row = {
+            "id": row.get("id", ""),
+            "name": row.get("name", ""),
+            "folder": row.get("folder", ""),
+            "modification date": row.get("modification_date", ""),
+        }
+        formatted_rows.append(formatted_row)
+    
+    print_rows(formatted_rows, args.json, columns=["id", "name", "folder", "modification date"])
 
 
 def cmd_notes_view(args: argparse.Namespace) -> None:
@@ -380,10 +400,11 @@ def cmd_notes_view(args: argparse.Namespace) -> None:
         print(json.dumps(row, ensure_ascii=False, indent=2))
         return
 
-    for k in ["id", "name", "creation_date", "modification_date", "folder"]:
+    for k in NOTES_DISPLAY_LABELS.keys():
         v = row.get(k, "")
-        if v and v != "missing value":
-            print(f"{k}: {v}")
+        if v and v != MISSING_VALUE:
+            label = NOTES_DISPLAY_LABELS.get(k, k)
+            print(f"{label}: {v}")
 
     print("")
     if args.html:

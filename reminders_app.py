@@ -14,6 +14,24 @@ except ImportError:
 
 DEFAULT_LIST_LIMIT = 100
 OSASCRIPT_TIMEOUT_SECONDS = 120
+MISSING_VALUE = "missing value"
+
+REMINDER_DISPLAY_LABELS = {
+    "id": "id",
+    "title": "title",
+    "completed": "completed",
+    "due_date": "due date",
+    "completion_date": "completion date",
+    "priority": "priority",
+    "list": "list",
+    "tags": "tags"
+}
+
+PRIORITY_MAP = {
+    "1": "high",
+    "5": "medium",
+    "9": "low",
+}
 
 
 class RemindersAppError(RuntimeError):
@@ -835,12 +853,6 @@ def cmd_reminders_list(args: argparse.Namespace) -> None:
         order=args.order,
     )
 
-    priority_map = {
-        "1": "high",
-        "5": "medium",
-        "9": "low",
-    }
-
     formatted_rows = []
     prefix = "x-apple-reminder://"
     for row in rows:
@@ -848,14 +860,14 @@ def cmd_reminders_list(args: argparse.Namespace) -> None:
             
         p_val = row.get("priority", "0")
         d_val = row.get("due_date", "")
-        if d_val == "missing value":
+        if d_val == MISSING_VALUE:
             d_val = "-"
             
         formatted_row = {
             "id": r_id,
             "title": row.get("title", ""),
             "completed": row.get("completed", ""),
-            "priority": priority_map.get(p_val, "-"),
+            "priority": PRIORITY_MAP.get(p_val, "-"),
             "due date": d_val,
         }
         formatted_rows.append(formatted_row)
@@ -872,11 +884,12 @@ def cmd_reminders_view(args: argparse.Namespace) -> None:
         print(json.dumps(row, ensure_ascii=False, indent=2))
         return
 
-    for k in ["id", "title", "completed", "due_date", "completion_date", "priority", "list", "tags"]:
+    for k in REMINDER_DISPLAY_LABELS.keys():
         v = row.get(k, "")
-        if v and v != "missing value":
-            print(f"{k}: {v}")
-
+        if v and v != MISSING_VALUE:
+            label = REMINDER_DISPLAY_LABELS.get(k, k)
+            print(f"{label}: {v}")
+    
     if row.get("notes"):
         print("")
         print(row["notes"])

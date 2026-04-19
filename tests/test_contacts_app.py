@@ -51,10 +51,10 @@ class ContactsAppTests(unittest.TestCase):
         self.assertEqual(0, exit_code)
         output = buffer.getvalue()
         self.assertIn("id: 1", output)
-        self.assertIn("first_name: John", output)
-        self.assertIn("last_name: Doe", output)
-        self.assertIn("birth_date: 1990-01-01", output)
-        self.assertIn("job_title: Engineer", output)
+        self.assertIn("first name: John", output)
+        self.assertIn("last name: Doe", output)
+        self.assertIn("birth date: 1990-01-01", output)
+        self.assertIn("job title: Engineer", output)
 
     def test_show_contact(self) -> None:
         with patch("contacts_app.run_osascript") as script_mock:

@@ -14,6 +14,21 @@ except ImportError:
 
 DEFAULT_LIST_LIMIT = 100
 OSASCRIPT_TIMEOUT_SECONDS = 120
+MISSING_VALUE = "missing value"
+
+CONTACT_DISPLAY_LABELS = {
+    "id": "id",
+    "first_name": "first name",
+    "last_name": "last name",
+    "organization": "organization",
+    "job_title": "job title",
+    "nickname": "nickname",
+    "birth_date": "birth date",
+    "note": "note",
+    "emails": "emails",
+    "phones": "phones",
+    "urls": "urls"
+}
 
 
 class ContactsAppError(RuntimeError):
@@ -373,7 +388,18 @@ def cmd_groups_delete(args: argparse.Namespace) -> None:
 
 def cmd_contacts_list(args: argparse.Namespace) -> None:
     rows = list_contacts(args.search, args.group, args.limit, args.order)
-    print_rows(rows, args.json)
+    
+    formatted_rows = []
+    for row in rows:
+        formatted_row = {
+            "id": row.get("id", ""),
+            "first name": row.get("first_name", ""),
+            "last name": row.get("last_name", ""),
+            "organization": row.get("organization", ""),
+        }
+        formatted_rows.append(formatted_row)
+    
+    print_rows(formatted_rows, args.json, columns=["id", "first name", "last name", "organization"])
 
 
 def cmd_contacts_view(args: argparse.Namespace) -> None:
@@ -381,9 +407,12 @@ def cmd_contacts_view(args: argparse.Namespace) -> None:
     if args.json:
         print(json.dumps(row, ensure_ascii=False, indent=2))
         return
-    for k, v in row.items():
-        if v and v != "missing value":
-            print(f"{k}: {v}")
+    
+    for k in CONTACT_DISPLAY_LABELS.keys():
+        v = row.get(k, "")
+        if v and v != MISSING_VALUE:
+            label = CONTACT_DISPLAY_LABELS.get(k, k)
+            print(f"{label}: {v}")
 
 
 def cmd_contacts_show(args: argparse.Namespace) -> None:
