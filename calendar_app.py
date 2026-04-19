@@ -583,11 +583,15 @@ def cmd_events_view(args: argparse.Namespace) -> None:
     if args.json:
         print(json.dumps(row, ensure_ascii=False, indent=2))
         return
-    for k, v in row.items():
-        if k != "description":
+
+    for k in ["id", "summary", "start_date", "end_date", "location", "allday", "url", "calendar", "alarms"]:
+        v = row.get(k, "")
+        if v and v != "missing value":
             print(f"{k}: {v}")
-    print("")
-    print(row["description"])
+
+    if row.get("description"):
+        print("")
+        print(row["description"])
 
 
 def cmd_events_show(args: argparse.Namespace) -> None:

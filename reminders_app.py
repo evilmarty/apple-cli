@@ -871,16 +871,15 @@ def cmd_reminders_view(args: argparse.Namespace) -> None:
     if args.json:
         print(json.dumps(row, ensure_ascii=False, indent=2))
         return
-    print(f"id: {row['id']}")
-    print(f"title: {row['title']}")
-    print(f"completed: {row['completed']}")
-    print(f"due_date: {row['due_date']}")
-    print(f"completion_date: {row['completion_date']}")
-    print(f"priority: {row['priority']}")
-    print(f"list: {row['list']}")
-    print(f"tags: {row['tags']}")
-    print("")
-    print(row["notes"])
+
+    for k in ["id", "title", "completed", "due_date", "completion_date", "priority", "list", "tags"]:
+        v = row.get(k, "")
+        if v and v != "missing value":
+            print(f"{k}: {v}")
+
+    if row.get("notes"):
+        print("")
+        print(row["notes"])
 
 
 def cmd_reminders_show(args: argparse.Namespace) -> None:

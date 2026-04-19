@@ -379,14 +379,19 @@ def cmd_notes_view(args: argparse.Namespace) -> None:
     if args.json:
         print(json.dumps(row, ensure_ascii=False, indent=2))
         return
-    for k, v in row.items():
-        if k not in ("body", "plaintext"):
+
+    for k in ["id", "name", "creation_date", "modification_date", "folder"]:
+        v = row.get(k, "")
+        if v and v != "missing value":
             print(f"{k}: {v}")
+
     print("")
     if args.html:
-        print(row["body"])
+        if row.get("body"):
+            print(row["body"])
     else:
-        print(row["plaintext"])
+        if row.get("plaintext"):
+            print(row["plaintext"])
 
 
 def cmd_notes_show(args: argparse.Namespace) -> None:

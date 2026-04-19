@@ -790,14 +790,15 @@ def cmd_messages_view(args: argparse.Namespace) -> None:
     if args.json:
         print(json.dumps(row, ensure_ascii=False, indent=2))
         return
-    print(f"id: {row['id']}")
-    print(f"subject: {row['subject']}")
-    print(f"sender: {row['sender']}")
-    print(f"date: {row['date']}")
-    print(f"account: {row['account']}")
-    print(f"mailbox: {row['mailbox']}")
-    print("")
-    print(row["content"])
+    
+    for k in ["id", "subject", "sender", "date", "account", "mailbox"]:
+        v = row.get(k, "")
+        if v and v != "missing value":
+            print(f"{k}: {v}")
+    
+    if row.get("content"):
+        print("")
+        print(row["content"])
 
 
 def cmd_messages_show(args: argparse.Namespace) -> None:

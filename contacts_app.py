@@ -382,7 +382,8 @@ def cmd_contacts_view(args: argparse.Namespace) -> None:
         print(json.dumps(row, ensure_ascii=False, indent=2))
         return
     for k, v in row.items():
-        print(f"{k}: {v}")
+        if v and v != "missing value":
+            print(f"{k}: {v}")
 
 
 def cmd_contacts_show(args: argparse.Namespace) -> None:
