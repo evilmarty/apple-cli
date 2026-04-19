@@ -6,7 +6,10 @@ import subprocess
 import sys
 from typing import Any, Sequence
 
-from version import __version__
+try:
+    from version import __version__
+except ImportError:
+    __version__ = "unknown"
 
 
 DEFAULT_LIST_LIMIT = 100
