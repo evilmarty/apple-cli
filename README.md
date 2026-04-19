@@ -17,17 +17,30 @@ A collection of Python CLIs for controlling Apple applications through AppleScri
 - macOS
 - Python 3.9+
 
-## Install (editable/development)
+## Installation
+
+To install the latest release from PyPI:
 
 ```bash
+python3 -m pip install apple-cli
+```
+
+### Editable/Development Install
+
+To install in editable mode for development:
+
+```bash
+git clone https://github.com/evilmarty/apple-cli.git
+cd apple-cli
 python3 -m pip install -e .
 ```
 
-Then run:
-
-```bash
-mail-app --help
-```
+After installation, the following commands will be available in your PATH:
+- `mail-app`
+- `reminders-app`
+- `calendar-app`
+- `notes-app`
+- `contacts-app`
 
 ## mail-app command overview
 
@@ -148,3 +161,58 @@ contacts-app groups list [--json]
 contacts-app groups create --name NAME
 contacts-app groups delete --name NAME
 ```
+
+## Building from source
+
+To build a wheel and source distribution:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/evilmarty/apple-cli.git
+   cd apple-cli
+   ```
+
+2. (Optional) Create and activate a virtual environment:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+
+3. Run the build command:
+   ```bash
+   make build
+   ```
+
+The build artifacts will be available in the `dist/` directory.
+
+## Testing
+
+The project uses the standard library `unittest` framework.
+
+To run all tests:
+```bash
+make test
+```
+
+To run tests for a specific application:
+```bash
+PYTHONPATH=src python3 -m unittest tests/test_calendar_app.py
+```
+
+Tests use mocking extensively to avoid actually executing AppleScripts that would interact with your native apps, making them safe to run in any environment.
+
+## Contributing
+
+Contributions are welcome! If you'd like to contribute:
+
+1. **Report Bugs or Request Features:** Open an issue on [GitHub](https://github.com/evilmarty/apple-cli/issues).
+2. **Submit Pull Requests:**
+   - Fork the repository.
+   - Create a new branch for your feature or fix.
+   - Ensure your code follows the existing style and is well-documented.
+   - **Important:** Add tests for any new functionality or bug fixes.
+   - Run the full test suite (`make test`) before submitting.
+3. **Coding Standards:**
+   - Use type hints for all function signatures.
+   - Keep the codebase compatible with Python 3.9+.
+   - Maintain the zero-dependency goal (use only the Python standard library).
