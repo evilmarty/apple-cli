@@ -974,6 +974,11 @@ def cmd_lists_delete(args: argparse.Namespace) -> None:
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = make_parser()
+    if argv is None:
+        argv = sys.argv[1:]
+    if not argv:
+        parser.print_help(sys.stderr)
+        return 1
     args = parser.parse_args(argv)
     try:
         args.func(args)

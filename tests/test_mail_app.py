@@ -1,7 +1,7 @@
 import io
 import subprocess
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -10,6 +10,15 @@ from apple_cli import version
 
 
 class AppleMailTests(unittest.TestCase):
+    def test_main_no_args_shows_help(self) -> None:
+        buffer = io.StringIO()
+        with redirect_stderr(buffer):
+            exit_code = mail_app.main([])
+        self.assertEqual(1, exit_code)
+        output = buffer.getvalue()
+        self.assertIn("usage:", output)
+        self.assertIn("mail-app", output)
+
     def test_run_osascript_success(self) -> None:
         completed = SimpleNamespace(returncode=0, stdout="ok\n", stderr="")
         with patch("apple_cli.mail_app.subprocess.run", return_value=completed) as run_mock:
