@@ -35,6 +35,16 @@ class ContactsAppError(RuntimeError):
     pass
 
 
+class SubcommandHelpFormatter(argparse.HelpFormatter):
+    def _format_action(self, action):
+        if isinstance(action, argparse._SubParsersAction):
+            parts = []
+            for subaction in self._iter_indented_subactions(action):
+                parts.append(self._format_action(subaction))
+            return "".join(parts)
+        return super()._format_action(action)
+
+
 def run_osascript(script: str, args: Sequence[str]) -> str:
     try:
         result = subprocess.run(
@@ -438,13 +448,14 @@ def make_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="contacts-app",
         description="macOS Contacts command-line interface powered by AppleScript.",
+        formatter_class=SubcommandHelpFormatter,
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
-    root_subparsers = parser.add_subparsers(dest="resource", required=True)
+    root_subparsers = parser.add_subparsers(dest="resource", required=True, title="commands", metavar="COMMAND")
 
     # Groups
-    groups_parser = root_subparsers.add_parser("groups", help="Group operations")
-    groups_subparsers = groups_parser.add_subparsers(dest="group_command", required=True)
+    groups_parser = root_subparsers.add_parser("groups", help="Group operations", formatter_class=SubcommandHelpFormatter)
+    groups_subparsers = groups_parser.add_subparsers(dest="group_command", required=True, title="commands", metavar="COMMAND")
 
     g_list = groups_subparsers.add_parser("list", aliases=["ls"], help="List groups")
     g_list.add_argument("--json", action="store_true", help="JSON output")
@@ -459,8 +470,8 @@ def make_parser() -> argparse.ArgumentParser:
     g_delete.set_defaults(func=cmd_groups_delete)
 
     # Contacts
-    contacts_parser = root_subparsers.add_parser("contacts", aliases=["ct", "cts"], help="Contact operations")
-    contacts_subparsers = contacts_parser.add_subparsers(dest="contact_command", required=True)
+    contacts_parser = root_subparsers.add_parser("contacts", aliases=["ct", "cts"], help="Contact operations", formatter_class=SubcommandHelpFormatter)
+    contacts_subparsers = contacts_parser.add_subparsers(dest="contact_command", required=True, title="commands", metavar="COMMAND")
 
     ct_list = contacts_subparsers.add_parser("list", aliases=["ls"], help="List contacts")
     ct_list.add_argument("--search", default="", help="Search by name or organization")

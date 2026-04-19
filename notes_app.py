@@ -29,6 +29,16 @@ class NotesAppError(RuntimeError):
     pass
 
 
+class SubcommandHelpFormatter(argparse.HelpFormatter):
+    def _format_action(self, action):
+        if isinstance(action, argparse._SubParsersAction):
+            parts = []
+            for subaction in self._iter_indented_subactions(action):
+                parts.append(self._format_action(subaction))
+            return "".join(parts)
+        return super()._format_action(action)
+
+
 def run_osascript(script: str, args: Sequence[str]) -> str:
     try:
         result = subprocess.run(
@@ -441,13 +451,14 @@ def make_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="notes-app",
         description="Apple Notes command-line interface powered by AppleScript.",
+        formatter_class=SubcommandHelpFormatter,
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
-    root_subparsers = parser.add_subparsers(dest="resource", required=True)
+    root_subparsers = parser.add_subparsers(dest="resource", required=True, title="commands", metavar="COMMAND")
 
     # Folders
-    folders_parser = root_subparsers.add_parser("folders", help="Folder operations")
-    folders_subparsers = folders_parser.add_subparsers(dest="folder_command", required=True)
+    folders_parser = root_subparsers.add_parser("folders", help="Folder operations", formatter_class=SubcommandHelpFormatter)
+    folders_subparsers = folders_parser.add_subparsers(dest="folder_command", required=True, title="commands", metavar="COMMAND")
 
     fold_list = folders_subparsers.add_parser("list", aliases=["ls"], help="List folders")
     fold_list.add_argument("--json", action="store_true", help="JSON output")
@@ -462,8 +473,8 @@ def make_parser() -> argparse.ArgumentParser:
     fold_delete.set_defaults(func=cmd_folders_delete)
 
     # Notes
-    notes_parser = root_subparsers.add_parser("notes", aliases=["nt", "nts"], help="Note operations")
-    notes_subparsers = notes_parser.add_subparsers(dest="note_command", required=True)
+    notes_parser = root_subparsers.add_parser("notes", aliases=["nt", "nts"], help="Note operations", formatter_class=SubcommandHelpFormatter)
+    notes_subparsers = notes_parser.add_subparsers(dest="note_command", required=True, title="commands", metavar="COMMAND")
 
     nt_list = notes_subparsers.add_parser("list", aliases=["ls"], help="List notes")
     nt_list.add_argument("--folder", default="", help="Folder name")

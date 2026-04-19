@@ -38,6 +38,16 @@ class RemindersAppError(RuntimeError):
     pass
 
 
+class SubcommandHelpFormatter(argparse.HelpFormatter):
+    def _format_action(self, action):
+        if isinstance(action, argparse._SubParsersAction):
+            parts = []
+            for subaction in self._iter_indented_subactions(action):
+                parts.append(self._format_action(subaction))
+            return "".join(parts)
+        return super()._format_action(action)
+
+
 def run_osascript(script: str, args: Sequence[str]) -> str:
     try:
         result = subprocess.run(
@@ -684,17 +694,19 @@ def make_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="reminders-app",
         description="Apple Reminders command-line interface powered by AppleScript.",
+        formatter_class=SubcommandHelpFormatter,
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
-    root_subparsers = parser.add_subparsers(dest="resource", required=True)
+    root_subparsers = parser.add_subparsers(dest="resource", required=True, title="commands", metavar="COMMAND")
 
     reminders_parser = root_subparsers.add_parser(
         "reminders",
         aliases=["rem", "rems"],
         help="Reminder operations",
         description="List, view, create, update, complete, delete, and move reminders.",
+        formatter_class=SubcommandHelpFormatter,
     )
-    reminders_subparsers = reminders_parser.add_subparsers(dest="reminder_command", required=True)
+    reminders_subparsers = reminders_parser.add_subparsers(dest="reminder_command", required=True, title="commands", metavar="COMMAND")
 
     reminders_list_parser = reminders_subparsers.add_parser(
         "list",
@@ -808,8 +820,9 @@ def make_parser() -> argparse.ArgumentParser:
         aliases=["lst", "lsts"],
         help="List operations",
         description="List and manage reminder lists.",
+        formatter_class=SubcommandHelpFormatter,
     )
-    lists_subparsers = lists_parser.add_subparsers(dest="list_command", required=True)
+    lists_subparsers = lists_parser.add_subparsers(dest="list_command", required=True, title="commands", metavar="COMMAND")
 
     lists_list_parser = lists_subparsers.add_parser("list", aliases=["ls"], help="List reminder lists", description="List reminder lists.")
     lists_list_parser.add_argument("--json", action="store_true", help="JSON output")

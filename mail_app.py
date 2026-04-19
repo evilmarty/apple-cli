@@ -31,6 +31,16 @@ class AppleMailError(RuntimeError):
     pass
 
 
+class SubcommandHelpFormatter(argparse.HelpFormatter):
+    def _format_action(self, action):
+        if isinstance(action, argparse._SubParsersAction):
+            parts = []
+            for subaction in self._iter_indented_subactions(action):
+                parts.append(self._format_action(subaction))
+            return "".join(parts)
+        return super()._format_action(action)
+
+
 def run_osascript(script: str, args: Sequence[str]) -> str:
     result = subprocess.run(
         ["osascript", "-s", "h", "-", *args],
@@ -649,17 +659,19 @@ def make_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mail-app",
         description="Apple Mail command-line interface powered by AppleScript.",
+        formatter_class=SubcommandHelpFormatter,
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
-    root_subparsers = parser.add_subparsers(dest="resource", required=True)
+    root_subparsers = parser.add_subparsers(dest="resource", required=True, title="commands", metavar="COMMAND")
 
     messages_parser = root_subparsers.add_parser(
         "messages",
         aliases=["msgs", "msg"],
         help="Message operations",
         description="List, inspect, send, move, and triage messages.",
+        formatter_class=SubcommandHelpFormatter,
     )
-    messages_subparsers = messages_parser.add_subparsers(dest="message_command", required=True)
+    messages_subparsers = messages_parser.add_subparsers(dest="message_command", required=True, title="commands", metavar="COMMAND")
 
     messages_list_parser = messages_subparsers.add_parser(
         "list",
@@ -741,8 +753,9 @@ def make_parser() -> argparse.ArgumentParser:
         aliases=["mbox", "mboxs", "mboxes"],
         help="Mailbox operations",
         description="List and manage mailboxes.",
+        formatter_class=SubcommandHelpFormatter,
     )
-    mailboxes_subparsers = mailboxes_parser.add_subparsers(dest="mailbox_command", required=True)
+    mailboxes_subparsers = mailboxes_parser.add_subparsers(dest="mailbox_command", required=True, title="commands", metavar="COMMAND")
 
     mailboxes_list_parser = mailboxes_subparsers.add_parser(
         "list",

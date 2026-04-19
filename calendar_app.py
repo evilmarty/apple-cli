@@ -33,6 +33,16 @@ class CalendarAppError(RuntimeError):
     pass
 
 
+class SubcommandHelpFormatter(argparse.HelpFormatter):
+    def _format_action(self, action):
+        if isinstance(action, argparse._SubParsersAction):
+            parts = []
+            for subaction in self._iter_indented_subactions(action):
+                parts.append(self._format_action(subaction))
+            return "".join(parts)
+        return super()._format_action(action)
+
+
 def run_osascript(script: str, args: Sequence[str]) -> str:
     try:
         result = subprocess.run(
@@ -676,13 +686,14 @@ def make_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="calendar-app",
         description="Apple Calendar command-line interface powered by AppleScript.",
+        formatter_class=SubcommandHelpFormatter,
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
-    root_subparsers = parser.add_subparsers(dest="resource", required=True)
+    root_subparsers = parser.add_subparsers(dest="resource", required=True, title="commands", metavar="COMMAND")
 
     # Calendars
-    calendars_parser = root_subparsers.add_parser("calendars", aliases=["cal", "cals"], help="Calendar operations")
-    calendars_subparsers = calendars_parser.add_subparsers(dest="calendar_command", required=True)
+    calendars_parser = root_subparsers.add_parser("calendars", aliases=["cal", "cals"], help="Calendar operations", formatter_class=SubcommandHelpFormatter)
+    calendars_subparsers = calendars_parser.add_subparsers(dest="calendar_command", required=True, title="commands", metavar="COMMAND")
 
     cal_list = calendars_subparsers.add_parser("list", aliases=["ls"], help="List calendars")
     cal_list.add_argument("--json", action="store_true", help="JSON output")
@@ -702,8 +713,8 @@ def make_parser() -> argparse.ArgumentParser:
     cal_delete.set_defaults(func=cmd_calendars_delete)
 
     # Events
-    events_parser = root_subparsers.add_parser("events", aliases=["ev", "evs"], help="Event operations")
-    events_subparsers = events_parser.add_subparsers(dest="event_command", required=True)
+    events_parser = root_subparsers.add_parser("events", aliases=["ev", "evs"], help="Event operations", formatter_class=SubcommandHelpFormatter)
+    events_subparsers = events_parser.add_subparsers(dest="event_command", required=True, title="commands", metavar="COMMAND")
 
     ev_list = events_subparsers.add_parser("list", aliases=["ls"], help="List events")
     ev_list.add_argument("--calendar", default="", help="Calendar name")
