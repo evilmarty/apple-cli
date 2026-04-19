@@ -5,34 +5,34 @@ from contextlib import redirect_stdout
 from types import SimpleNamespace
 from unittest.mock import patch
 
-import reminders_app
-import version
+from apple_cli import reminders_app
+from apple_cli import version
 
 
 class RemindersAppTests(unittest.TestCase):
     def test_run_osascript_success(self) -> None:
         completed = SimpleNamespace(returncode=0, stdout="ok\n", stderr="")
-        with patch("reminders_app.subprocess.run", return_value=completed) as run_mock:
+        with patch("apple_cli.reminders_app.subprocess.run", return_value=completed) as run_mock:
             output = reminders_app.run_osascript("script", ["arg1"])
         self.assertEqual("ok", output)
         self.assertEqual(["osascript", "-s", "h", "-", "arg1"], run_mock.call_args.args[0])
 
     def test_run_osascript_error(self) -> None:
         completed = SimpleNamespace(returncode=1, stdout="", stderr="script failed")
-        with patch("reminders_app.subprocess.run", return_value=completed):
+        with patch("apple_cli.reminders_app.subprocess.run", return_value=completed):
             with self.assertRaises(reminders_app.RemindersAppError):
                 reminders_app.run_osascript("script", [])
 
     def test_run_osascript_timeout(self) -> None:
         with patch(
-            "reminders_app.subprocess.run",
+            "apple_cli.reminders_app.subprocess.run",
             side_effect=subprocess.TimeoutExpired(cmd="osascript", timeout=30),
         ):
             with self.assertRaises(reminders_app.RemindersAppError):
                 reminders_app.run_osascript("script", [])
 
     def test_reminders_list_defaults(self) -> None:
-        with patch("reminders_app.list_reminders", return_value=[]) as list_mock:
+        with patch("apple_cli.reminders_app.list_reminders", return_value=[]) as list_mock:
             exit_code = reminders_app.main(["reminders", "list"])
         self.assertEqual(0, exit_code)
         self.assertEqual("", list_mock.call_args.kwargs["list_name"])
@@ -41,13 +41,13 @@ class RemindersAppTests(unittest.TestCase):
         self.assertEqual("desc", list_mock.call_args.kwargs["order"])
 
     def test_reminders_list_completed_filter(self) -> None:
-        with patch("reminders_app.list_reminders", return_value=[]) as list_mock:
+        with patch("apple_cli.reminders_app.list_reminders", return_value=[]) as list_mock:
             exit_code = reminders_app.main(["reminders", "list", "--completed"])
         self.assertEqual(0, exit_code)
         self.assertEqual("completed", list_mock.call_args.kwargs["completed_filter"])
 
     def test_reminders_list_all_filter_and_order(self) -> None:
-        with patch("reminders_app.list_reminders", return_value=[]) as list_mock:
+        with patch("apple_cli.reminders_app.list_reminders", return_value=[]) as list_mock:
             exit_code = reminders_app.main(["reminders", "list", "--all", "--order", "asc", "--limit", "5"])
         self.assertEqual(0, exit_code)
         self.assertEqual("all", list_mock.call_args.kwargs["completed_filter"])
@@ -55,7 +55,7 @@ class RemindersAppTests(unittest.TestCase):
         self.assertEqual("asc", list_mock.call_args.kwargs["order"])
 
     def test_list_reminders_uses_property_array_loop(self) -> None:
-        with patch("reminders_app.run_osascript", return_value="") as script_mock:
+        with patch("apple_cli.reminders_app.run_osascript", return_value="") as script_mock:
             reminders_app.list_reminders(
                 list_name="",
                 completed_filter="uncompleted",
@@ -73,19 +73,19 @@ class RemindersAppTests(unittest.TestCase):
         self.assertNotIn("name of reminderRef", script)
 
     def test_reminders_aliases_work(self) -> None:
-        with patch("reminders_app.run_osascript", return_value=""):
+        with patch("apple_cli.reminders_app.run_osascript", return_value=""):
             exit_code = reminders_app.main(["rem", "ls"])
         self.assertEqual(0, exit_code)
 
     def test_lists_aliases_work(self) -> None:
-        with patch("reminders_app.run_osascript", return_value=""):
+        with patch("apple_cli.reminders_app.run_osascript", return_value=""):
             exit_code = reminders_app.main(["lsts", "ls"])
         self.assertEqual(0, exit_code)
 
     def test_view_body_only(self) -> None:
         buffer = io.StringIO()
         with patch(
-            "reminders_app.run_osascript",
+            "apple_cli.reminders_app.run_osascript",
             return_value="1\tTitle\tBody text\tfalse\t\t\t0\tInbox\t",
         ), redirect_stdout(buffer):
             exit_code = reminders_app.main(["reminders", "view", "--id", "1", "--body-only"])
@@ -102,9 +102,9 @@ class RemindersAppTests(unittest.TestCase):
 
     def test_bulk_complete_by_filter(self) -> None:
         with patch(
-            "reminders_app.list_reminders",
+            "apple_cli.reminders_app.list_reminders",
             return_value=[{"id": "1"}, {"id": "2"}],
-        ), patch("reminders_app.set_completed") as set_completed_mock:
+        ), patch("apple_cli.reminders_app.set_completed") as set_completed_mock:
             exit_code = reminders_app.main(["reminders", "complete", "--list", "Inbox"])
         self.assertEqual(0, exit_code)
         self.assertEqual(2, set_completed_mock.call_count)
@@ -117,7 +117,7 @@ class RemindersAppTests(unittest.TestCase):
         self.assertEqual(f"reminders-app {version.__version__}", buffer.getvalue().strip())
 
     def test_show_reminder(self) -> None:
-        with patch("reminders_app.run_osascript") as script_mock:
+        with patch("apple_cli.reminders_app.run_osascript") as script_mock:
             exit_code = reminders_app.main(["reminders", "show", "--id", "123"])
         self.assertEqual(0, exit_code)
         script_mock.assert_called_once()
@@ -125,7 +125,7 @@ class RemindersAppTests(unittest.TestCase):
         self.assertIn("activate", script_mock.call_args[0][0])
 
     def test_subprocess_failure_returns_nonzero(self) -> None:
-        with patch("reminders_app.run_osascript", side_effect=subprocess.SubprocessError("spawn failed")):
+        with patch("apple_cli.reminders_app.run_osascript", side_effect=subprocess.SubprocessError("spawn failed")):
             code = reminders_app.main(["reminders", "list"])
         self.assertEqual(1, code)
 

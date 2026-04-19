@@ -5,20 +5,41 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "apple-cli"
 dynamic = ["version"]
-description = "CLI tooling for Apple Mail via AppleScript"
+description = "Command-line interfaces for macOS native apps (Mail, Reminders, Calendar, Notes, Contacts)"
 readme = "README.md"
 requires-python = ">=3.9"
+authors = [
+    {name = "Marty Zalega", email = "marty@zalega.me"}
+]
+classifiers = [
+    "Operating System :: MacOS :: MacOS X",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities",
+]
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/evilmarty/apple-cli"
+Repository = "https://github.com/evilmarty/apple-cli"
+Issues = "https://github.com/evilmarty/apple-cli/issues"
+
 [project.scripts]
-mail-app = "mail_app:main"
-reminders-app = "reminders_app:main"
-calendar-app = "calendar_app:main"
-notes-app = "notes_app:main"
-contacts-app = "contacts_app:main"
+mail-app = "apple_cli.mail_app:main"
+reminders-app = "apple_cli.reminders_app:main"
+calendar-app = "apple_cli.calendar_app:main"
+notes-app = "apple_cli.notes_app:main"
+contacts-app = "apple_cli.contacts_app:main"
 
 [tool.setuptools]
-py-modules = ["mail_app", "reminders_app", "calendar_app", "notes_app", "contacts_app", "version"]
+package-dir = {"" = "src"}
+packages = ["apple_cli"]
 
 [tool.setuptools.dynamic]
-version = {attr = "version.__version__"}
+version = {attr = "apple_cli.version.__version__"}

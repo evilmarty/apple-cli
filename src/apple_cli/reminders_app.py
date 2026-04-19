@@ -7,7 +7,7 @@ import sys
 from typing import Any, Sequence
 
 try:
-    from version import __version__
+    from .version import __version__
 except ImportError:
     __version__ = "unknown"
 

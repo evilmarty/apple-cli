@@ -5,33 +5,33 @@ from contextlib import redirect_stdout
 from types import SimpleNamespace
 from unittest.mock import patch
 
-import calendar_app
+from apple_cli import calendar_app
 
 
 class CalendarAppTests(unittest.TestCase):
     def test_run_osascript_success(self) -> None:
         completed = SimpleNamespace(returncode=0, stdout="ok\n", stderr="")
-        with patch("calendar_app.subprocess.run", return_value=completed) as run_mock:
+        with patch("apple_cli.calendar_app.subprocess.run", return_value=completed) as run_mock:
             output = calendar_app.run_osascript("script", ["arg1"])
         self.assertEqual("ok", output)
         self.assertEqual(["osascript", "-s", "h", "-", "arg1"], run_mock.call_args.args[0])
 
     def test_run_osascript_error(self) -> None:
         completed = SimpleNamespace(returncode=1, stdout="", stderr="script failed")
-        with patch("calendar_app.subprocess.run", return_value=completed):
+        with patch("apple_cli.calendar_app.subprocess.run", return_value=completed):
             with self.assertRaises(calendar_app.CalendarAppError):
                 calendar_app.run_osascript("script", [])
 
     def test_run_osascript_timeout(self) -> None:
         with patch(
-            "calendar_app.subprocess.run",
+            "apple_cli.calendar_app.subprocess.run",
             side_effect=subprocess.TimeoutExpired(cmd="osascript", timeout=30),
         ):
             with self.assertRaises(calendar_app.CalendarAppError):
                 calendar_app.run_osascript("script", [])
 
     def test_events_list_defaults(self) -> None:
-        with patch("calendar_app.list_events", return_value=[]) as list_mock:
+        with patch("apple_cli.calendar_app.list_events", return_value=[]) as list_mock:
             exit_code = calendar_app.main(["events", "list"])
         self.assertEqual(0, exit_code)
         self.assertEqual("", list_mock.call_args.kwargs["calendar_name"])
@@ -41,7 +41,7 @@ class CalendarAppTests(unittest.TestCase):
         self.assertEqual("desc", list_mock.call_args.kwargs["order"])
 
     def test_events_list_filters(self) -> None:
-        with patch("calendar_app.list_events", return_value=[]) as list_mock:
+        with patch("apple_cli.calendar_app.list_events", return_value=[]) as list_mock:
             exit_code = calendar_app.main(["events", "list", "--calendar", "Work", "--start-after", "2026-01-01"])
         self.assertEqual(0, exit_code)
         self.assertEqual("Work", list_mock.call_args.kwargs["calendar_name"])
@@ -52,7 +52,7 @@ class CalendarAppTests(unittest.TestCase):
         # Updated mock to match the 10 columns: id, summary, start_date, end_date, location, description, allday, url, calendar, alarms
         mock_output = "1\tSummary\t2026-04-18\t2026-04-18\tLocation\tNotes\tfalse\thttp://example.com\tCalendar\t-15"
         with patch(
-            "calendar_app.run_osascript",
+            "apple_cli.calendar_app.run_osascript",
             return_value=mock_output,
         ), redirect_stdout(buffer):
             exit_code = calendar_app.main(["events", "view", "--id", "1"])
@@ -63,7 +63,7 @@ class CalendarAppTests(unittest.TestCase):
         self.assertIn("Notes", output)
 
     def test_events_create_duration(self) -> None:
-        with patch("calendar_app.create_event") as create_mock:
+        with patch("apple_cli.calendar_app.create_event") as create_mock:
             exit_code = calendar_app.main([
                 "events", "create", 
                 "--summary", "Meeting", 
@@ -76,7 +76,7 @@ class CalendarAppTests(unittest.TestCase):
         self.assertEqual("", create_mock.call_args.kwargs["end_date"])
 
     def test_show_event(self) -> None:
-        with patch("calendar_app.run_osascript") as script_mock:
+        with patch("apple_cli.calendar_app.run_osascript") as script_mock:
             exit_code = calendar_app.main(["events", "show", "--id", "123"])
         self.assertEqual(0, exit_code)
         script_mock.assert_called_once()
@@ -84,7 +84,7 @@ class CalendarAppTests(unittest.TestCase):
         self.assertIn("activate", script_mock.call_args[0][0])
 
     def test_subprocess_failure_returns_nonzero(self) -> None:
-        with patch("calendar_app.run_osascript", side_effect=subprocess.SubprocessError("spawn failed")):
+        with patch("apple_cli.calendar_app.run_osascript", side_effect=subprocess.SubprocessError("spawn failed")):
             code = calendar_app.main(["events", "list"])
         self.assertEqual(1, code)
 

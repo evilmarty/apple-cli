@@ -1,0 +1,5 @@
+recursive-exclude tests *
+exclude .python-version
+exclude Makefile
+exclude test_argparse*
+exclude test_labels.py
