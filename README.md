@@ -8,6 +8,8 @@ A collection of Python CLIs for controlling Apple applications through AppleScri
 
 `calendar-app` is a Python CLI for Apple Calendar to manage calendars and events.
 
+`notes-app` is a Python CLI for Apple Notes to manage notes and folders.
+
 ## Requirements
 
 - macOS
@@ -102,4 +104,25 @@ calendar-app calendars list [--json]
 calendar-app calendars create --name NAME
 calendar-app calendars rename --calendar NAME --new-name NEW_NAME
 calendar-app calendars delete --calendar NAME
+```
+
+## notes-app command overview
+
+### Notes
+
+```bash
+notes-app notes list [--folder FOLDER] [--limit N] [--order desc|asc] [--json]
+notes-app notes view --id ID [--json]
+notes-app notes show --id ID
+notes-app notes create --name NAME --body TEXT [--folder FOLDER]
+notes-app notes update --id ID [--name NAME] [--body TEXT] [--folder FOLDER]
+notes-app notes delete --id ID
+```
+
+### Folders
+
+```bash
+notes-app folders list [--json]
+notes-app folders create --name NAME
+notes-app folders delete --name NAME
 ```
