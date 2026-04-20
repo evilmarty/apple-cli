@@ -50,7 +50,7 @@ After installation, the following commands will be available in your PATH:
 mail-app messages list [--account ACCOUNT] [--mailbox MAILBOX] [--limit N] [--order desc|asc] [--json]
 mail-app messages view (--id "<id>" | --message-id "<message-id>") [--account ACCOUNT] [--mailbox MAILBOX] [--body-only] [--json]
 mail-app messages show (--id "<id>" | --message-id "<message-id>") [--account ACCOUNT] [--mailbox MAILBOX]
-mail-app messages send --to "a@example.com,b@example.com" --subject "Hello" --body "Hi there" [--cc ...] [--bcc ...] [--account ACCOUNT]
+mail-app messages send --to TO [--to TO] --subject "Hello" --body "Hi there" [--cc CC] [--bcc BCC] [--account ACCOUNT]
 mail-app messages move (--id "<id>" | --message-id "<message-id>") --destination-mailbox DEST [--account ACCOUNT] [--source-mailbox MAILBOX]
 mail-app messages archive (--id "<id>" | --message-id "<message-id>") [--account ACCOUNT] [--mailbox MAILBOX]
 mail-app messages trash (--id "<id>" | --message-id "<message-id>") [--account ACCOUNT] [--mailbox MAILBOX]

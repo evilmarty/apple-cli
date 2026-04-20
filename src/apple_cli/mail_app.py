@@ -716,9 +716,9 @@ def make_parser() -> argparse.ArgumentParser:
         help="Create and send a message",
         description="Create and send a new outgoing message.",
     )
-    messages_send_parser.add_argument("--to", required=True, help="Comma-separated recipient addresses")
-    messages_send_parser.add_argument("--cc", default="", help="Comma-separated CC addresses")
-    messages_send_parser.add_argument("--bcc", default="", help="Comma-separated BCC addresses")
+    messages_send_parser.add_argument("--to", action="append", required=True, help="Recipient address (can be specified multiple times)")
+    messages_send_parser.add_argument("--cc", action="append", help="CC address (can be specified multiple times)")
+    messages_send_parser.add_argument("--bcc", action="append", help="BCC address (can be specified multiple times)")
     messages_send_parser.add_argument("--subject", required=True, help="Subject line")
     messages_send_parser.add_argument("--body", required=True, help="Message body")
     messages_send_parser.add_argument("--account", default="", help="Mail account name to send from")
@@ -850,7 +850,10 @@ def cmd_messages_show(args: argparse.Namespace) -> None:
 
 
 def cmd_messages_send(args: argparse.Namespace) -> None:
-    send_message(args.to, args.cc, args.bcc, args.subject, args.body, args.account)
+    to_csv = ",".join(args.to)
+    cc_csv = ",".join(args.cc) if args.cc else ""
+    bcc_csv = ",".join(args.bcc) if args.bcc else ""
+    send_message(to_csv, cc_csv, bcc_csv, args.subject, args.body, args.account)
     print("Message sent.")
 
 

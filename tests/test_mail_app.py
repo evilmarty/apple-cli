@@ -159,6 +159,32 @@ class AppleMailTests(unittest.TestCase):
             parser.parse_args(["--version"])
         self.assertEqual(f"mail-app {version.__version__}", buffer.getvalue().strip())
 
+    def test_messages_send_multiple_to(self) -> None:
+        with patch("apple_cli.mail_app.run_osascript") as script_mock:
+            exit_code = mail_app.main([
+                "messages", "send",
+                "--to", "a@example.com",
+                "--to", "b@example.com",
+                "--cc", "c@example.com",
+                "--cc", "d@example.com",
+                "--subject", "Test Subject",
+                "--body", "Test Body"
+            ])
+        self.assertEqual(0, exit_code)
+        # Check that send_message was called with comma-separated strings
+        # send_message(to_addresses, cc_addresses, bcc_addresses, subject, body, account)
+        # It's called inside cmd_messages_send which calls send_message.
+        # But our main() call patches run_osascript which is called inside send_message.
+        # So we check the arguments passed to run_osascript via script_mock.
+        
+        # run_osascript(script, [to_csv, cc_csv, bcc_csv, subject, body, account])
+        args = script_mock.call_args[0][1]
+        self.assertEqual("a@example.com,b@example.com", args[0])
+        self.assertEqual("c@example.com,d@example.com", args[1])
+        self.assertEqual("", args[2]) # bcc
+        self.assertEqual("Test Subject", args[3])
+        self.assertEqual("Test Body", args[4])
+
     def test_subprocess_failure_returns_nonzero(self) -> None:
         with patch(
             "apple_cli.mail_app.run_osascript",
